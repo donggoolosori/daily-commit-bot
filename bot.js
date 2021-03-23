@@ -7,11 +7,28 @@ import { graphQLClient } from './graphQLClient.js';
 
 dotenv.config();
 
+let userDB = [];
+
 const bot = new telegram(`${process.env.BOT_TOKEN}`, {
   polling: true,
 });
 
-cron.schedule('*/10 * * * * *', async () => {
+const userRegisterMsg = `
+Your github username is successfully registered! 🎉
+From now on, you can get an alarm of github contributions.
+`;
+
+bot.onText(/\/user (.+)/, (msg, match) => {
+  bot.sendMessage(1740567815, userRegisterMsg);
+  const newData = {
+    id: msg.chat.id,
+    username: match[1],
+  };
+  userDB.push(newData);
+  console.log(userDB);
+});
+
+cron.schedule('* * * * *', async () => {
   const today = moment();
   const from = today.startOf('day').format();
   const to = today.endOf('day').format();
