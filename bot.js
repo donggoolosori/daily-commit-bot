@@ -17,9 +17,21 @@ const userRegisterMsg = `
 Your github username is successfully registered! 🎉
 From now on, you can get an alarm of github contributions.
 `;
+const helpMsg = `
+/help - get help message
+/user <your-github-username> - register your github username
+`;
+
+bot.onText(/\/start/, (msg) => {
+  bot.sendMessage(msg.chat.id, helpMsg);
+});
+
+bot.onText(/\/help/, (msg) => {
+  bot.sendMessage(msg.chat.id, helpMsg);
+});
 
 bot.onText(/\/user (.+)/, (msg, match) => {
-  bot.sendMessage(1740567815, userRegisterMsg);
+  bot.sendMessage(msg.chat.id, userRegisterMsg);
   const newData = {
     id: msg.chat.id,
     username: match[1],
