@@ -1,17 +1,14 @@
 import telegram from 'node-telegram-bot-api';
 import cron from 'node-cron';
-import { gql, GraphQLClient } from 'graphql-request';
+import { gql } from 'graphql-request';
 import moment from 'moment';
+import dotenv from 'dotenv';
+import { graphQLClient } from './graphQLClient.js';
 
-const bot = new telegram('1769867744:AAEqitqeJLy897CqSW_NH9eIl2wmW1yvFmY', {
+dotenv.config();
+
+const bot = new telegram(`${process.env.BOT_TOKEN}`, {
   polling: true,
-});
-const endpoint = 'https://api.github.com/graphql';
-
-const graphQLClient = new GraphQLClient(endpoint, {
-  headers: {
-    authorization: 'Token 8dc3ae6cf7244d5a36aeacb87da8f0c713c36f43',
-  },
 });
 
 cron.schedule('*/10 * * * * *', async () => {
@@ -30,6 +27,7 @@ cron.schedule('*/10 * * * * *', async () => {
       }
     }
   `;
+
   const variables = {
     user: 'donggoolosori',
     from: from,
@@ -46,5 +44,5 @@ cron.schedule('*/10 * * * * *', async () => {
 
   console.log(totalContributions);
 
-  bot.sendMessage(1740567815, totalContributions);
+  // bot.sendMessage(1740567815, totalContributions);
 });
