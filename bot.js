@@ -14,14 +14,14 @@ const graphQLClient = new GraphQLClient(endpoint, {
   },
 });
 
-cron.schedule('* * * * *', async () => {
+cron.schedule('*/10 * * * * *', async () => {
   const today = moment();
   const from = today.startOf('day').format();
   const to = today.endOf('day').format();
 
   const query = gql`
     query($user: String!, $from: DateTime, $to: DateTime) {
-      user(login: "donggoolosori") {
+      user(login: $user) {
         contributionsCollection(from: $from, to: $to) {
           contributionCalendar {
             totalContributions
