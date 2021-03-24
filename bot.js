@@ -14,6 +14,7 @@ import {
 
 dotenv.config();
 
+// AWS 환경설정
 Aws.config.update({
   region: 'ap-northeast-2',
   endpoint: 'https://dynamodb.ap-northeast-2.amazonaws.com',
@@ -21,16 +22,20 @@ Aws.config.update({
   secretAccessKey: `${process.env.AWS_SECRET_KEY}`,
 });
 
+// dynamoDB client 인스턴스 생성
 const docClient = new Aws.DynamoDB.DocumentClient();
 
+// bot 인스턴스 생성
 const bot = new telegram(`${process.env.BOT_TOKEN}`, {
   polling: true,
 });
 
+// start command
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(msg.chat.id, helpMsg);
 });
 
+// help command
 bot.onText(/\/help/, (msg) => {
   bot.sendMessage(msg.chat.id, helpMsg);
 });
