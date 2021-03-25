@@ -91,6 +91,52 @@ const sendCommitMessage = async () => {
   });
 };
 
+const sendCommandMessage = async (message) => {
+  const chatId = message.chat.id;
+  const name = message.from.first_name;
+  const text = message.text;
+  const textSplits = text.split(' ');
+  // 명령어 설정
+  if (textSplits[0] == '/start') {
+    bot.sendMessage(chatId, msgPack.greetMsg(name));
+  } else if (textSplits[0] == '/help') {
+    bot.sendMessage(chatId, msgPack.helpMsg);
+  } else if (textSplits[0] == '/user') {
+    const username = textSplits[1];
+    if (username) {
+      const username = textSplits[1];
+      if (username) {
+        // 파라미터 설정
+        const params = {
+          TableName: 'daily-commit-bot',
+          Item: {
+            chatId: chatId,
+            username: username,
+          },
+        };
+
+        // {chatId, username} 형식으로 DB에 저장
+        docClient.put(params, (err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
+          }
+        });
+      } else {
+        bot.sendMessage(
+          chatId,
+          '/user 뒤에 한 칸 띄고 username을 입력해주세요~'
+        );
+      }
+    } else {
+      bot.sendMessage(chatId, '/user 뒤에 username을 입력해주세요~');
+    }
+  } else {
+    bot.sendMessage(chatId, msgPack.errorMsg);
+  }
+};
+
 module.exports.hello = async (event) => {
   // user의 message 요청이 아닐 경우 (cron 실행)
   if (!event.body) {
@@ -103,27 +149,8 @@ module.exports.hello = async (event) => {
       }),
     };
   }
-
   const message = JSON.parse(event.body).message;
-  const chatId = message.chat.id;
-  const text = message.text;
-  const textSplits = text.split(' ');
-
-  // 명령어 설정
-  if (textSplits[0] == '/start') {
-    bot.sendMessage(chatId, msgPack.greetMsg(msg.from.first_name));
-  } else if (textSplits[0] == '/help') {
-    bot.sendMessage(chatId, msgPack.helpMsg);
-  } else if (textSplits[0] == '/user') {
-    const username = textSplits[1];
-    if (username) {
-      bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
-    } else {
-      bot.sendMessage(chatId, '/user 뒤에 username을 입력해주세요~');
-    }
-  } else {
-    bot.sendMessage(chatId, msgPack.errorMsg);
-  }
+  await sendCommandMessage(message);
 
   return {
     statusCode: 200,

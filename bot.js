@@ -24,41 +24,54 @@ const bot = new telegram(`${process.env.BOT_TOKEN}`, {
   polling: true,
 });
 
-bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-  const text = msg.text;
+const sendCommandMessage = async (message) => {
+  const chatId = message.chat.id;
+  const name = message.from.first_name;
+  const text = message.text;
   const textSplits = text.split(' ');
-
+  // 명령어 설정
   if (textSplits[0] == '/start') {
-    bot.sendMessage(chatId, msgPack.greetMsg(msg.from.first_name));
+    bot.sendMessage(chatId, msgPack.greetMsg(name));
   } else if (textSplits[0] == '/help') {
     bot.sendMessage(chatId, msgPack.helpMsg);
   } else if (textSplits[0] == '/user') {
     const username = textSplits[1];
     if (username) {
-      // 파라미터 설정
-      const params = {
-        TableName: 'daily-commit-bot',
-        Item: {
-          chatId: chatId,
-          username: username,
-        },
-      };
+      const username = textSplits[1];
+      if (username) {
+        // 파라미터 설정
+        const params = {
+          TableName: 'daily-commit-bot',
+          Item: {
+            chatId: chatId,
+            username: username,
+          },
+        };
 
-      // {chatId, username} 형식으로 DB에 저장
-      docClient.put(params, (err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
-        }
-      });
+        // {chatId, username} 형식으로 DB에 저장
+        docClient.put(params, (err) => {
+          if (err) {
+            console.log(err);
+          } else {
+            bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
+          }
+        });
+      } else {
+        bot.sendMessage(
+          chatId,
+          '/user 뒤에 한 칸 띄고 username을 입력해주세요~'
+        );
+      }
     } else {
-      bot.sendMessage(chatId, '/user 뒤에 한 칸 띄고 username을 입력해주세요~');
+      bot.sendMessage(chatId, '/user 뒤에 username을 입력해주세요~');
     }
   } else {
     bot.sendMessage(chatId, msgPack.errorMsg);
   }
+};
+
+bot.on('message', (msg) => {
+  sendCommandMessage(msg);
 });
 
 // // start command 설정
