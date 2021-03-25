@@ -9,13 +9,13 @@ const helpMsg = `
 /help - 도움말 
 /user <your-github-username> - github username을 등록합니다. 등록된 username의 커밋을 확인하여 알람을 보내오니, 정확한 username을 입력해주세요!
 `;
-const commitMsg = [
-  '커밋하세요!',
-  '커밋 커밋 커밋!',
-  '당신의 잔디밭이 시들고 있습니다..',
-];
 
-const getRandomCommitMsg = (commitMsg) => {
+const getRandomCommitMsg = () => {
+  const commitMsg = [
+    '커밋하세요!',
+    '커밋 커밋 커밋!',
+    '당신의 잔디밭이 시들고 있습니다..',
+  ];
   const len = commitMsg.length;
   const randNum = Math.floor(Math.random() * len);
   return commitMsg[randNum];
@@ -23,5 +23,4 @@ const getRandomCommitMsg = (commitMsg) => {
 
 exports.userRegisterMsg = userRegisterMsg;
 exports.helpMsg = helpMsg;
-exports.commitMsg = commitMsg;
 exports.getRandomCommitMsg = getRandomCommitMsg;
