@@ -138,6 +138,7 @@ const sendCommandMessage = async (message) => {
 };
 
 module.exports.hello = async (event) => {
+  console.log(event.body);
   // user의 message 요청이 아닐 경우 (cron 실행)
   if (!event.body) {
     await sendCommitMessage();
