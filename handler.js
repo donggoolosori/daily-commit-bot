@@ -25,7 +25,7 @@ Aws.config.update({
 // dynamoDB client 인스턴스 생성
 const docClient = new Aws.DynamoDB.DocumentClient();
 
-const sendMessage = async () => {
+const sendCommitMessage = async () => {
   // 오늘 날짜 설정
   const today = moment();
   const from = today.startOf('day').format();
@@ -69,18 +69,22 @@ const sendMessage = async () => {
           to: to,
         };
         // user의 contribution 갯수 받기
-        const {
-          user: {
-            contributionsCollection: {
-              contributionCalendar: { totalContributions },
+        try {
+          const {
+            user: {
+              contributionsCollection: {
+                contributionCalendar: { totalContributions },
+              },
             },
-          },
-        } = await graphQLClient.request(query, variables);
+          } = await graphQLClient.request(query, variables);
 
-        console.log(totalContributions);
-        // 오늘 contribution이 없다면 알람을 보낸다.
-        if (totalContributions == 0) {
-          bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
+          console.log(totalContributions);
+          // 오늘 contribution이 없다면 알람을 보낸다.
+          if (totalContributions == 0) {
+            bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
+          }
+        } catch (err) {
+          console.log(err);
         }
       });
     }
@@ -90,22 +94,35 @@ const sendMessage = async () => {
 module.exports.hello = async (event) => {
   // user의 message 요청이 아닐 경우 (cron 실행)
   if (!event.body) {
-    await sendMessage();
+    await sendCommitMessage();
     return {
-      statusCode: 400,
+      statusCode: 200,
       body: JSON.stringify({
-        message: 'Bad Request',
+        message: 'Commit Check Succeed',
         input: event,
       }),
     };
   }
+
   const message = JSON.parse(event.body).message;
   const chatId = message.chat.id;
   const text = message.text;
+  const textSplits = text.split(' ');
 
-  console.log(chatId, text);
-
-  await bot.sendMessage(1740567815, 'test test');
+  if (textSplits[0] == '/start') {
+    bot.sendMessage(chatId, msgPack.greetMsg(msg.from.first_name));
+  } else if (textSplits[0] == '/help') {
+    bot.sendMessage(chatId, msgPack.helpMsg);
+  } else if (textSplits[0] == '/user') {
+    const username = textSplits[1];
+    if (username) {
+      bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
+    } else {
+      bot.sendMessage(chatId, '/user 뒤에 username을 입력해주세요~');
+    }
+  } else {
+    bot.sendMessage(chatId, msgPack.errorMsg);
+  }
 
   return {
     statusCode: 200,
