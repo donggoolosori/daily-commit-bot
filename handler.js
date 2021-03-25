@@ -19,7 +19,7 @@ Aws.config.update({
   region: 'ap-northeast-2',
   endpoint: 'https://dynamodb.ap-northeast-2.amazonaws.com',
   accessKeyId: `${process.env.AWS_ACCESS_ID}`,
-  secretAccessKey: `${process.env.AWS_SECRET_KEY}`,
+  secretAccessKey: `${process.env.AWS_ACCESS_SECRET_KEY}`,
 });
 
 // dynamoDB client 인스턴스 생성
