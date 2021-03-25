@@ -1,6 +1,6 @@
 'use strict';
 
-const telegram = require('node-telegram-bot-api');
+const TelegramBot = require('node-telegram-bot-api');
 const dotenv = require('dotenv');
 const Aws = require('aws-sdk');
 const moment = require('moment');
@@ -12,7 +12,7 @@ const graphQLClient = require('./graphQLClient');
 dotenv.config();
 
 // bot 인스턴스 생성
-const bot = new telegram(`${process.env.BOT_TOKEN}`);
+const bot = new TelegramBot(`${process.env.BOT_TOKEN}`);
 
 // AWS 환경설정
 Aws.config.update({
@@ -96,41 +96,34 @@ const sendCommandMessage = async (message) => {
   const name = message.from.first_name;
   const text = message.text;
   const textSplits = text.split(' ');
+
   // 명령어 설정
   if (textSplits[0] == '/start') {
-    bot.sendMessage(chatId, msgPack.greetMsg(name));
+    await bot.sendMessage(chatId, msgPack.greetMsg(name));
   } else if (textSplits[0] == '/help') {
-    bot.sendMessage(chatId, msgPack.helpMsg);
+    await bot.sendMessage(chatId, msgPack.helpMsg);
   } else if (textSplits[0] == '/user') {
     const username = textSplits[1];
     if (username) {
-      const username = textSplits[1];
-      if (username) {
-        // 파라미터 설정
-        const params = {
-          TableName: 'daily-commit-bot',
-          Item: {
-            chatId: chatId,
-            username: username,
-          },
-        };
+      // 파라미터 설정
+      const params = {
+        TableName: 'daily-commit-bot',
+        Item: {
+          chatId: chatId,
+          username: username,
+        },
+      };
 
-        // {chatId, username} 형식으로 DB에 저장
-        docClient.put(params, (err) => {
-          if (err) {
-            console.log(err);
-          } else {
-            bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
-          }
-        });
-      } else {
-        bot.sendMessage(
-          chatId,
-          '/user 뒤에 한 칸 띄고 username을 입력해주세요~'
-        );
-      }
+      // {chatId, username} 형식으로 DB에 저장
+      docClient.put(params, (err) => {
+        if (err) {
+          console.log(err);
+        } else {
+          bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
+        }
+      });
     } else {
-      bot.sendMessage(chatId, '/user 뒤에 username을 입력해주세요~');
+      bot.sendMessage(chatId, '/user 뒤에 한 칸 띄고 username을 입력해주세요~');
     }
   } else {
     bot.sendMessage(chatId, msgPack.errorMsg);
@@ -138,7 +131,6 @@ const sendCommandMessage = async (message) => {
 };
 
 module.exports.hello = async (event) => {
-  console.log(event.body);
   // user의 message 요청이 아닐 경우 (cron 실행)
   if (!event.body) {
     await sendCommitMessage();
@@ -151,6 +143,7 @@ module.exports.hello = async (event) => {
     };
   }
   const message = JSON.parse(event.body).message;
+
   await sendCommandMessage(message);
 
   return {

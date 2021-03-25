@@ -175,7 +175,7 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/daily-commit-bot/dev/1616655913550-2021-03-25T07:05:13.550Z/daily-commit-bot.zip"
+                "S3Key": "serverless/daily-commit-bot/dev/1616669624537-2021-03-25T10:53:44.537Z/daily-commit-bot.zip"
               },
               "Handler": "handler.hello",
               "Runtime": "nodejs14.x",
@@ -193,14 +193,14 @@
               "HelloLogGroup"
             ]
           },
-          "HelloLambdaVersionePUzHZvKPZLV5RfeknkovwEUe19lQAbKuOJqztoGU": {
+          "HelloLambdaVersioneyj4I16iktaHAYHQJX1z65VMQgcGQE5HLXnekWuceA": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "HelloLambdaFunction"
               },
-              "CodeSha256": "sfQ6uiec11nDrDnjkh8LZ0OJGp5dFMDg5reLwdEB9Vs="
+              "CodeSha256": "fUwhOC/a/zxh7sybCGPk20zc4S8iNKgYLeHejf635hE="
             }
           }
         },
@@ -213,7 +213,7 @@
           "HelloLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "HelloLambdaVersionePUzHZvKPZLV5RfeknkovwEUe19lQAbKuOJqztoGU"
+              "Ref": "HelloLambdaVersioneyj4I16iktaHAYHQJX1z65VMQgcGQE5HLXnekWuceA"
             }
           }
         }
@@ -313,7 +313,7 @@
         "timeout": 6,
         "runtime": "nodejs14.x",
         "vpc": {},
-        "versionLogicalId": "HelloLambdaVersionePUzHZvKPZLV5RfeknkovwEUe19lQAbKuOJqztoGU"
+        "versionLogicalId": "HelloLambdaVersioneyj4I16iktaHAYHQJX1z65VMQgcGQE5HLXnekWuceA"
       }
     },
     "configValidationMode": "warn",
@@ -336,7 +336,7 @@
     "artifact": "/Users/dongjune/Documents/Web/daily-commit-bot/.serverless/daily-commit-bot.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/daily-commit-bot/dev/1616655913550-2021-03-25T07:05:13.550Z",
+    "artifactDirectoryName": "serverless/daily-commit-bot/dev/1616669624537-2021-03-25T10:53:44.537Z",
     "artifact": "daily-commit-bot.zip"
   }
 }
