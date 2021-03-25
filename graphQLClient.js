@@ -1,12 +1,14 @@
-import { GraphQLClient } from 'graphql-request';
-import dotenv from 'dotenv';
+const { GraphQLClient } = require('graphql-request');
+const dotenv = require('dotenv');
 
 dotenv.config();
 
 const endpoint = 'https://api.github.com/graphql';
 
-export const graphQLClient = new GraphQLClient(endpoint, {
+const graphQLClient = new GraphQLClient(endpoint, {
   headers: {
     authorization: `Token ${process.env.GITHUB_TOKEN}`,
   },
 });
+
+module.exports = graphQLClient;
