@@ -109,6 +109,7 @@ module.exports.hello = async (event) => {
   const text = message.text;
   const textSplits = text.split(' ');
 
+  // 명령어 설정
   if (textSplits[0] == '/start') {
     bot.sendMessage(chatId, msgPack.greetMsg(msg.from.first_name));
   } else if (textSplits[0] == '/help') {

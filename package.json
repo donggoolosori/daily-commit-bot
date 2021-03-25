@@ -2,7 +2,7 @@
   "name": "daily-commit-bot",
   "version": "1.0.0",
   "description": "Check daily commit and alarm with telegram bot",
-  "main": "bot.js",
+  "main": "index.js",
   "dependencies": {
     "aws-sdk": "^2.870.0",
     "dotenv": "^8.2.0",
