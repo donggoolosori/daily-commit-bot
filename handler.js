@@ -37,58 +37,65 @@ const sendCommitMessage = async () => {
   };
 
   // db의 모든 user 정보 가져오기
-  docClient.scan(params, (err, data) => {
-    if (err) {
-      console.log(err);
-    } else {
-      // db의 모든 user 정보
-      const users = data.Items;
+  try {
+    const data = await docClient.scan(params).promise();
+    if (!data) {
+      throw 'noData';
+    }
+    // db의 모든 user 정보
+    const users = data.Items;
+    // user마다 알림보내기(contribution이 0일 경우만)
+    users.forEach(async (user) => {
+      const chatId = user.chatId;
+      const username = user.username;
 
-      // user마다 알림보내기(contribution이 0일 경우만)
-      users.forEach(async (user) => {
-        const chatId = user.chatId;
-        const username = user.username;
-
-        // graphQL 쿼리 생성
-        const query = gql`
-          query($user: String!, $from: DateTime, $to: DateTime) {
-            user(login: $user) {
-              contributionsCollection(from: $from, to: $to) {
-                contributionCalendar {
-                  totalContributions
-                }
+      // graphQL 쿼리 생성
+      const query = gql`
+        query($user: String!, $from: DateTime, $to: DateTime) {
+          user(login: $user) {
+            contributionsCollection(from: $from, to: $to) {
+              contributionCalendar {
+                totalContributions
               }
             }
           }
-        `;
-
-        // graphQL 변수 설정
-        const variables = {
-          user: username,
-          from: from,
-          to: to,
-        };
-        // user의 contribution 갯수 받기
-        try {
-          const {
-            user: {
-              contributionsCollection: {
-                contributionCalendar: { totalContributions },
-              },
-            },
-          } = await graphQLClient.request(query, variables);
-
-          console.log(totalContributions);
-          // 오늘 contribution이 없다면 알람을 보낸다.
-          if (totalContributions == 0) {
-            bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
-          }
-        } catch (err) {
-          console.log(err);
         }
-      });
+      `;
+
+      // graphQL 변수 설정
+      const variables = {
+        user: username,
+        from: from,
+        to: to,
+      };
+      // TODO : graphQLClient.request가 안됨
+      // user의 contribution 갯수 받기
+      const {
+        user: {
+          contributionsCollection: {
+            contributionCalendar: { totalContributions },
+          },
+        },
+      } = await graphQLClient.request(query, variables);
+
+      if (!totalContributions) {
+        console.log('error');
+        throw 'github_error';
+      }
+      // 오늘 contribution이 없다면 알람을 보낸다.
+      if (totalContributions === 0) {
+        bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
+      }
+    });
+  } catch (err) {
+    if (err === 'noData') {
+      console.log('There is no user');
+    } else if (err === 'github_error') {
+      console.log('Github api error');
+    } else {
+      console.log('Dynamodb scan error');
     }
-  });
+  }
 };
 
 const sendCommandMessage = async (message) => {
@@ -100,13 +107,13 @@ const sendCommandMessage = async (message) => {
   const username = textSplits[1];
 
   // 명령어 설정
-  if (command == '/start') {
+  if (command === '/start') {
     return bot.sendMessage(chatId, msgPack.greetMsg(name));
   }
-  if (command == '/help') {
+  if (command === '/help') {
     return bot.sendMessage(chatId, msgPack.helpMsg);
   }
-  if (command == '/user' && username) {
+  if (command === '/user' && username) {
     console.log('username exists');
     // 파라미터 설정
     const params = {
@@ -124,6 +131,9 @@ const sendCommandMessage = async (message) => {
     } catch (err) {
       console.log(err);
     }
+  }
+  if (command === '/test') {
+    return sendCommitMessage();
   }
   bot.sendMessage(chatId, msgPack.errorMsg);
 };
