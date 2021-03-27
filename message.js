@@ -23,7 +23,7 @@ const helpMsg = `
 /user <your-github-username> - github username을 등록합니다. 등록된 username의 커밋을 확인하여 알람을 보내오니, 정확한 username을 입력해주세요!
 ex) /user donggoolosori
 
-알람주기 : 저녁 8시, 9시, 10시, 11시, 11시 30분 
+알람주기 : 저녁 8시, 9시, 10시, 11시
 `;
 
 const errorMsg = `잘 이해하지 못했어요 ㅠㅠ
