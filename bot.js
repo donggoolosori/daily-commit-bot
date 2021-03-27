@@ -2,9 +2,8 @@ const telegram = require('node-telegram-bot-api');
 const dotenv = require('dotenv');
 const Aws = require('aws-sdk');
 const moment = require('moment');
-const { gql } = require('graphql-request');
+const { gql, GraphQLClient } = require('graphql-request');
 const msgPack = require('./message');
-const graphQLClient = require('./graphQLClient');
 
 dotenv.config();
 
@@ -29,48 +28,50 @@ const sendCommandMessage = async (message) => {
   const name = message.from.first_name;
   const text = message.text;
   const textSplits = text.split(' ');
-  // 명령어 설정
-  if (textSplits[0] == '/start') {
-    bot.sendMessage(chatId, msgPack.greetMsg(name));
-  } else if (textSplits[0] == '/help') {
-    bot.sendMessage(chatId, msgPack.helpMsg);
-  } else if (textSplits[0] == '/user') {
-    const username = textSplits[1];
-    if (username) {
-      const username = textSplits[1];
-      if (username) {
-        // 파라미터 설정
-        const params = {
-          TableName: 'daily-commit-bot',
-          Item: {
-            chatId: chatId,
-            username: username,
-          },
-        };
+  const command = textSplits[0];
+  const username = textSplits[1];
 
-        // {chatId, username} 형식으로 DB에 저장
-        docClient.put(params, (err) => {
-          if (err) {
-            console.log(err);
-          } else {
-            bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
-          }
-        });
-      } else {
-        bot.sendMessage(
-          chatId,
-          '/user 뒤에 한 칸 띄고 username을 입력해주세요~'
-        );
-      }
-    } else {
-      bot.sendMessage(chatId, '/user 뒤에 username을 입력해주세요~');
-    }
-  } else {
-    bot.sendMessage(chatId, msgPack.errorMsg);
+  // 명령어 설정
+  if (command === '/start') {
+    return bot.sendMessage(chatId, msgPack.greetMsg(name));
   }
+  if (command === '/help') {
+    return bot.sendMessage(chatId, msgPack.helpMsg);
+  }
+  if (command === '/user' && username) {
+    console.log('username exists');
+    // 파라미터 설정
+    const params = {
+      TableName: 'daily-commit-bot',
+      Item: {
+        chatId: chatId,
+        username: username,
+      },
+    };
+    // {chatId, username} 형식으로 DB에 저장
+
+    try {
+      await docClient.put(params).promise();
+      return bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
+    } catch (err) {
+      console.log(err);
+    }
+  }
+  if (command === '/test') {
+    return await sendCommitMessage();
+  }
+  bot.sendMessage(chatId, msgPack.errorMsg);
 };
 
 const sendCommitMessage = async () => {
+  // graphql client 설정
+  const endpoint = 'https://api.github.com/graphql';
+
+  const graphQLClient = new GraphQLClient(endpoint, {
+    headers: {
+      authorization: `Token ${process.env.GITHUB_TOKEN}`,
+    },
+  });
   // 오늘 날짜 설정
   const today = moment();
   const from = today.startOf('day').format();
@@ -136,9 +137,9 @@ const sendCommitMessage = async () => {
   });
 };
 
-bot.on('message', (msg) => {
-  sendCommitMessage();
-  sendCommandMessage(msg);
+bot.on('message', async (msg) => {
+  // sendCommitMessage();
+  await sendCommandMessage(msg);
 });
 
 // // start command 설정
