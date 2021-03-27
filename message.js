@@ -32,13 +32,39 @@ const errorMsg = `잘 이해하지 못했어요 ㅠㅠ
 
 const getRandomCommitMsg = () => {
   const commitMsg = [
-    '커밋하세요!',
-    '커밋 커밋 커밋!',
-    '당신의 잔디밭이 시들고 있습니다..',
+    `커밋 할 시간!`,
+    `커밋 커밋 커밋!`,
+    `잔디밭이 시들고 있어요...`,
   ];
-  const len = commitMsg.length;
-  const randNum = Math.floor(Math.random() * len);
-  return commitMsg[randNum];
+  const newLine = `
+
+  `;
+  const wiseSaying = [
+    `아직 커밋 할 시간이 있는 한 희망은 있다.
+    - 키케로`,
+    `커밋 한다는것, 그것은 치열한 전투이다.
+    - 로망로랑`,
+    `어리석은 자는 멀리서 행복을 찾고, 현명한 자는 1일 1커밋을 하며 행복을 키워간다.
+    - 제임스 오펜하임`,
+    `진짜 문제는 1일 1커밋이다. 그것은 절대로 물리학이나 윤리학의 문제가 아니다. 
+    - 아인슈타인`,
+    `당신이 커밋 할수 있다고 믿든 할수 없다고 믿든, 믿는 대로 될것이다.
+    - 헨리 포드`,
+    `작은 커밋으로부터 종종 위대한 업적이 시작된다.
+    - 데모스테네스`,
+    `내 비장의 무기는 아직 손안에 있다. 그것은 1일 1커밋이다. 
+    – 나폴레옹`,
+    `네 자신의 불행을 생각하지 않게 되는 가장 좋은 방법은 커밋하는 것이다. 
+    - 베토벤`,
+    `최고에 도달하려면 1일 1커밋에서 시작하라. 
+    - P.시루스`,
+  ];
+  const wlen = wiseSaying.length;
+  const clen = commitMsg.length;
+  const wRandNum = Math.floor(Math.random() * wlen);
+  const cRandNum = Math.floor(Math.random() * clen);
+
+  return commitMsg[cRandNum] + newLine + wiseSaying[wRandNum];
 };
 
 exports.greetMsg = greetMsg;
