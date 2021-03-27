@@ -38,6 +38,7 @@ const getRandomCommitMsg = () => {
   ];
   const newLine = `
 
+  🔥커밋 명언🔥
   `;
   const wiseSaying = [
     `아직 커밋 할 시간이 있는 한 희망은 있다.
