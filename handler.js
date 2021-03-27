@@ -4,9 +4,8 @@ const TelegramBot = require('node-telegram-bot-api');
 const dotenv = require('dotenv');
 const AWS = require('aws-sdk');
 const moment = require('moment');
-const { gql } = require('graphql-request');
+const { gql, GraphQLClient } = require('graphql-request');
 const msgPack = require('./message');
-const graphQLClient = require('./graphQLClient');
 
 // dotenv 설정
 dotenv.config();
@@ -24,6 +23,29 @@ AWS.config.update({
 
 // dynamoDB client 인스턴스 생성
 const docClient = new AWS.DynamoDB.DocumentClient();
+
+const getContributions = async (query, variables) => {
+  // graphql client 설정
+  const endpoint = 'https://api.github.com/graphql';
+
+  const graphQLClient = new GraphQLClient(endpoint, {
+    headers: {
+      authorization: `Token ${process.env.GITHUB_TOKEN}`,
+    },
+  });
+  try {
+    const {
+      user: {
+        contributionsCollection: {
+          contributionCalendar: { totalContributions },
+        },
+      },
+    } = await graphQLClient.request(query, variables);
+    return totalContributions;
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const sendCommitMessage = async () => {
   // 오늘 날짜 설정
@@ -45,12 +67,12 @@ const sendCommitMessage = async () => {
     // db의 모든 user 정보
     const users = data.Items;
     // user마다 알림보내기(contribution이 0일 경우만)
-    users.forEach(async (user) => {
-      const chatId = user.chatId;
-      const username = user.username;
+    for (let i = 0; i < users.length; i++) {
+      const chatId = users[i].chatId;
+      const username = users[i].username;
 
       // graphQL 쿼리 생성
-      const query = gql`
+      const query = await gql`
         query($user: String!, $from: DateTime, $to: DateTime) {
           user(login: $user) {
             contributionsCollection(from: $from, to: $to) {
@@ -70,30 +92,20 @@ const sendCommitMessage = async () => {
       };
       // TODO : graphQLClient.request가 안됨
       // user의 contribution 갯수 받기
-      const {
-        user: {
-          contributionsCollection: {
-            contributionCalendar: { totalContributions },
-          },
-        },
-      } = await graphQLClient.request(query, variables);
+      console.log(query, variables);
+      const totalContributions = await getContributions(query, variables);
+      console.log(totalContributions);
 
-      if (!totalContributions) {
-        console.log('error');
-        throw 'github_error';
-      }
       // 오늘 contribution이 없다면 알람을 보낸다.
       if (totalContributions === 0) {
-        bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
+        await bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
       }
-    });
+    }
   } catch (err) {
     if (err === 'noData') {
       console.log('There is no user');
-    } else if (err === 'github_error') {
-      console.log('Github api error');
     } else {
-      console.log('Dynamodb scan error');
+      console.log(err);
     }
   }
 };
@@ -108,13 +120,10 @@ const sendCommandMessage = async (message) => {
 
   // 명령어 설정
   if (command === '/start') {
-    return bot.sendMessage(chatId, msgPack.greetMsg(name));
-  }
-  if (command === '/help') {
-    return bot.sendMessage(chatId, msgPack.helpMsg);
-  }
-  if (command === '/user' && username) {
-    console.log('username exists');
+    await bot.sendMessage(chatId, msgPack.greetMsg(name));
+  } else if (command === '/help') {
+    await bot.sendMessage(chatId, msgPack.helpMsg);
+  } else if (command === '/user' && username) {
     // 파라미터 설정
     const params = {
       TableName: 'daily-commit-bot',
@@ -123,19 +132,19 @@ const sendCommandMessage = async (message) => {
         username: username,
       },
     };
-    // {chatId, username} 형식으로 DB에 저장
 
+    // {chatId, username} 형식으로 DB에 저장
     try {
       await docClient.put(params).promise();
-      return bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
+      await bot.sendMessage(chatId, msgPack.userRegisterMsg(username));
     } catch (err) {
       console.log(err);
     }
+  } else if (command === '/test') {
+    await sendCommitMessage();
+  } else {
+    await bot.sendMessage(chatId, msgPack.errorMsg);
   }
-  if (command === '/test') {
-    return sendCommitMessage();
-  }
-  bot.sendMessage(chatId, msgPack.errorMsg);
 };
 
 module.exports.hello = async (event) => {
