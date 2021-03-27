@@ -94,12 +94,11 @@ const sendCommitMessage = async () => {
       // user의 contribution 갯수 받기
       const totalContributions = await getContributions(query, variables);
       console.log(totalContributions);
-      await bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
 
       // 오늘 contribution이 없다면 알람을 보낸다.
-      // if (totalContributions === 0) {
-      //   await bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
-      // }
+      if (totalContributions === 0) {
+        await bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
+      }
     }
   } catch (err) {
     if (err === 'noData') {
