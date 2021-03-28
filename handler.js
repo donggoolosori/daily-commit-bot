@@ -24,15 +24,16 @@ AWS.config.update({
 // dynamoDB client 인스턴스 생성
 const docClient = new AWS.DynamoDB.DocumentClient();
 
-const getContributions = async (query, variables) => {
-  // graphql client 설정
-  const endpoint = 'https://api.github.com/graphql';
+// graphql client 설정
+const endpoint = 'https://api.github.com/graphql';
 
-  const graphQLClient = new GraphQLClient(endpoint, {
-    headers: {
-      authorization: `Token ${process.env.GITHUB_TOKEN}`,
-    },
-  });
+const graphQLClient = new GraphQLClient(endpoint, {
+  headers: {
+    authorization: `Token ${process.env.GITHUB_TOKEN}`,
+  },
+});
+
+const getContributions = async (query, variables) => {
   try {
     const {
       user: {
@@ -49,9 +50,9 @@ const getContributions = async (query, variables) => {
 
 const sendCommitMessage = async () => {
   // 오늘 날짜 설정
-  const today = moment();
-  const from = today.startOf('day').format();
-  const to = today.endOf('day').format();
+  const today = moment.utc().startOf('day');
+  const from = today.subtract(9, 'hour').format();
+  const to = moment.utc().format();
 
   // 가져올 table이름 설정
   const params = {
