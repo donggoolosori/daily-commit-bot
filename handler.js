@@ -139,6 +139,26 @@ const sendCommandMessage = async (message) => {
     } catch (err) {
       console.log(err);
     }
+  } else if (command === '/user') {
+    const params = {
+      TableName: 'daily-commit-bot',
+      Key: {
+        chatId: chatId,
+      },
+    };
+    const data = await docClient.get(params).promise();
+    const currUser = data.Item.username;
+    if (!currUser) {
+      await bot.sendMessage(
+        chatId,
+        '아직 github 계정을 등록하지 않았습니다! username을 등록해주세요.'
+      );
+    } else {
+      await bot.sendMessage(
+        chatId,
+        `현재 등록된 github username은 "${currUser}" 입니다.`
+      );
+    }
   } else if (command === '/test') {
     await sendCommitMessage();
   } else {
