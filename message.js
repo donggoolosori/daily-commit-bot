@@ -20,6 +20,7 @@ const userRegisterMsg = (username) => {
 };
 const helpMsg = `
 /help - 도움말 
+/user - 현재 등록된 github username을 알려줍니다.
 /user <your-github-username> - github username을 등록합니다. 등록된 username의 커밋을 확인하여 알람을 보내오니, 정확한 username을 입력해주세요!
 ex) /user donggoolosori
 
