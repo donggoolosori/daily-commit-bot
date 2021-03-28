@@ -147,13 +147,13 @@ const sendCommandMessage = async (message) => {
       },
     };
     const data = await docClient.get(params).promise();
-    const currUser = data.Item.username;
-    if (!currUser) {
+    if (!data) {
       await bot.sendMessage(
         chatId,
         '아직 github 계정을 등록하지 않았습니다! username을 등록해주세요.'
       );
     } else {
+      const currUser = data.Item.username;
       await bot.sendMessage(
         chatId,
         `현재 등록된 github username은 "${currUser}" 입니다.`
