@@ -146,18 +146,23 @@ const sendCommandMessage = async (message) => {
         chatId: chatId,
       },
     };
-    const data = await docClient.get(params).promise();
-    if (!data) {
-      await bot.sendMessage(
-        chatId,
-        '아직 github 계정을 등록하지 않았습니다! username을 등록해주세요.'
-      );
-    } else {
-      const currUser = data.Item.username;
-      await bot.sendMessage(
-        chatId,
-        `현재 등록된 github username은 "${currUser}" 입니다.`
-      );
+    try {
+      const data = await docClient.get(params).promise();
+      console.log(data);
+      if (Object.keys(data).length === 0) {
+        await bot.sendMessage(
+          chatId,
+          '아직 github 계정을 등록하지 않았습니다! username을 등록해주세요.'
+        );
+      } else {
+        const currUser = data.Item.username;
+        await bot.sendMessage(
+          chatId,
+          `현재 등록된 github username은 "${currUser}" 입니다.`
+        );
+      }
+    } catch (error) {
+      console.log(error);
     }
   } else if (command === '/test') {
     await sendCommitMessage();
