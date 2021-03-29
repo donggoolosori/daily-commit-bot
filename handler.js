@@ -50,10 +50,12 @@ const getContributions = async (query, variables) => {
 
 const sendCommitMessage = async () => {
   // 오늘 날짜 설정
-  const today = moment().startOf('day');
   // const from = today.subtract(9, 'hour').format();
-  const from = moment().startOf('day').format();
-  const to = moment().format();
+  const kr_now = moment().add(9, 'hour');
+  const to = kr_now.format();
+  const from = kr_now.startOf('day').format();
+
+  console.log(from, to);
 
   // 가져올 table이름 설정
   const params = {
