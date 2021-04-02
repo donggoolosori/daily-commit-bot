@@ -70,9 +70,9 @@ const sendCommitMessage = async () => {
     }
     // db의 모든 user 정보
     const users = data.Items;
-    
+
     // user마다 알림보내기(contribution이 0일 경우만)
-    const promises = users.map((user)=>{
+    const promises = users.map(async (user) => {
       const chatId = user.chatId;
       const username = user.username;
 
@@ -104,9 +104,8 @@ const sendCommitMessage = async () => {
       if (totalContributions === 0) {
         await bot.sendMessage(chatId, msgPack.getRandomCommitMsg());
       }
-    })
+    });
     await Promise.all(promises);
-
   } catch (err) {
     if (err === 'noData') {
       console.log('There is no user');
