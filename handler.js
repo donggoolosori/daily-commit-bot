@@ -95,7 +95,6 @@ const sendCommitMessage = async () => {
         from: from,
         to: to,
       };
-      // TODO : graphQLClient.request가 안됨
       // user의 contribution 갯수 받기
       const totalContributions = await getContributions(query, variables);
       console.log(totalContributions);
